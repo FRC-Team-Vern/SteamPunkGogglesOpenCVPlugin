@@ -61,6 +61,7 @@
 #endif
 
 #include "gststeampunkgoggles.h"
+#include "lib/cppprocess.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_opencv_steampunk_goggles_debug);
 #define GST_CAT_DEFAULT gst_opencv_opencv_steampunk_goggles_debug
@@ -312,15 +313,7 @@ gst_opencv_steampunk_goggles_transform_ip (GstOpencvVideoFilter * base,
   //        filter->ypos), &(filter->font), cvScalar (filter->colorR,
   //        filter->colorG, filter->colorB, 0));
 
-  IplImage *channels[4];
-  cvSplit(img, channels[0], channels[1], channels[2], channels[3]);
-
-  IplImage *temp = channels[0];
-  img = channels[0];
-  g_free(temp);
-  g_free(channels[1]);
-  g_free(channels[2]);
-  g_free(channels[3]);
+  img = cppProcess(img);
 
   return GST_FLOW_OK;
 }
