@@ -307,13 +307,8 @@ gst_opencv_steampunk_goggles_transform_ip (GstOpencvVideoFilter * base,
 {
   GstOpenCVSteamPunkGoggles *filter = GST_OPENCV_STEAMPUNK_GOGGLES (base);
 
-  //cvInitFont (&(filter->font), CV_FONT_VECTOR0, filter->width, filter->height,
-  //    0, filter->thickness, 0);
-  //cvPutText (img, filter->textbuf, cvPoint (filter->xpos,
-  //        filter->ypos), &(filter->font), cvScalar (filter->colorR,
-  //        filter->colorG, filter->colorB, 0));
-
-  img = cppProcess(img);
+  // This is where the OpenCV processing magic happens
+  cppProcess(img);
 
   return GST_FLOW_OK;
 }

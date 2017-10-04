@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-IplImage * cppProcess(IplImage *);
+void cppProcess(IplImage *);
 #ifdef __cplusplus
 }
 #endif
