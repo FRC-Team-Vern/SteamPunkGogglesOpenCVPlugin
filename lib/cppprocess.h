@@ -3,7 +3,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void cppProcess(IplImage *);
+// Declare c function prototype
+int cppProcess(IplImage *);
 #ifdef __cplusplus
 }
 #endif

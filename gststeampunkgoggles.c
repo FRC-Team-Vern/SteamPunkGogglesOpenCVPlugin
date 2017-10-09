@@ -106,6 +106,10 @@ gst_opencv_steampunk_goggles_finalize (GObject * obj)
 {
   GstOpenCVSteamPunkGoggles *filter = GST_OPENCV_STEAMPUNK_GOGGLES (obj);
 
+  zmq_close (filter->publisher);
+  zmq_ctx_destroy (filter->context);
+  free(filter->data);
+
   G_OBJECT_CLASS (gst_opencv_steampunk_goggles_parent_class)->finalize (obj);
 }
 
@@ -201,7 +205,7 @@ static void
 gst_opencv_steampunk_goggles_init (GstOpenCVSteamPunkGoggles * filter)
 {
 
-
+  printf("gst_opencv_steampunk_goggles_init\n");
   // Set ContourFilter values
   filter->contourFilters.minArea = 1.0;
   filter->contourFilters.maxArea = 50000.0;
@@ -211,92 +215,101 @@ gst_opencv_steampunk_goggles_init (GstOpenCVSteamPunkGoggles * filter)
   filter->contourFilters.maxHeight = 1500.0;
   filter->contourFilters.maxWidth = 200.0;
 
+  filter->context = zmq_ctx_new();
+  filter->publisher = zmq_socket (filter->context, ZMQ_PUB);
+  filter->rc = zmq_bind (filter->publisher, "tcp://*:5800");
+  filter->data = malloc(sizeof(int));
+
   gst_opencv_video_filter_set_in_place (GST_OPENCV_VIDEO_FILTER_CAST (filter),
       TRUE);
 }
 
-// static void
-// gst_opencv_steampunk_goggles_set_property (GObject * object, guint prop_id,
-//     const GValue * value, GParamSpec * pspec)
-// {
-//   GstOpenCVSteamPunkGoggles *filter = GST_OPENCV_STEAMPUNK_GOGGLES (object);
-//
-//   switch (prop_id) {
-//     case PROP_TEXT:
-//       g_free (filter->textbuf);
-//       filter->textbuf = g_value_dup_string (value);
-//       break;
-//     case PROP_XPOS:
-//       filter->xpos = g_value_get_int (value);
-//       break;
-//     case PROP_YPOS:
-//       filter->ypos = g_value_get_int (value);
-//       break;
-//     case PROP_THICKNESS:
-//       filter->thickness = g_value_get_int (value);
-//       break;
-//
-//     case PROP_COLOR_R:
-//       filter->colorR = g_value_get_int (value);
-//       break;
-//     case PROP_COLOR_G:
-//       filter->colorG = g_value_get_int (value);
-//       break;
-//     case PROP_COLOR_B:
-//       filter->colorB = g_value_get_int (value);
-//       break;
-//
-//     case PROP_HEIGHT:
-//       filter->height = g_value_get_double (value);
-//       break;
-//     case PROP_WIDTH:
-//       filter->width = g_value_get_double (value);
-//       break;
-//     default:
-//       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-//       break;
-//   }
-// }
+/*
+ static void
+ gst_opencv_steampunk_goggles_set_property (GObject * object, guint prop_id,
+     const GValue * value, GParamSpec * pspec)
+ {
+   GstOpenCVSteamPunkGoggles *filter = GST_OPENCV_STEAMPUNK_GOGGLES (object);
 
-// static void
-// gst_opencv_steampunk_goggles_get_property (GObject * object, guint prop_id,
-//     GValue * value, GParamSpec * pspec)
-// {
-//   GstOpenCVSteamPunkGoggles *filter = GST_OPENCV_STEAMPUNK_GOGGLES (object);
-//
-//   switch (prop_id) {
-//     case PROP_TEXT:
-//       g_value_set_string (value, filter->textbuf);
-//       break;
-//     case PROP_XPOS:
-//       g_value_set_int (value, filter->xpos);
-//       break;
-//     case PROP_YPOS:
-//       g_value_set_int (value, filter->ypos);
-//       break;
-//     case PROP_THICKNESS:
-//       g_value_set_int (value, filter->thickness);
-//       break;
-//     case PROP_COLOR_R:
-//       g_value_set_int (value, filter->colorR);
-//       break;
-//     case PROP_COLOR_G:
-//       g_value_set_int (value, filter->colorG);
-//       break;
-//     case PROP_COLOR_B:
-//       g_value_set_int (value, filter->colorB);
-//       break;
-//     case PROP_HEIGHT:
-//       g_value_set_double (value, filter->height);
-//       break;
-//     case PROP_WIDTH:
-//       g_value_set_double (value, filter->width);
-//       break;
-//     default:
-//       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-//       break;
-//   }
-// }
+   switch (prop_id) {
+     case PROP_TEXT:
+       g_free (filter->textbuf);
+       filter->textbuf = g_value_dup_string (value);
+       break;
+     case PROP_XPOS:
+       filter->xpos = g_value_get_int (value);
+       break;
+     case PROP_YPOS:
+       filter->ypos = g_value_get_int (value);
+       break;
+     case PROP_THICKNESS:
+       filter->thickness = g_value_get_int (value);
+       break;
+
+     case PROP_COLOR_R:
+       filter->colorR = g_value_get_int (value);
+       break;
+     case PROP_COLOR_G:
+       filter->colorG = g_value_get_int (value);
+       break;
+     case PROP_COLOR_B:
+       filter->colorB = g_value_get_int (value);
+       break;
+
+     case PROP_HEIGHT:
+       filter->height = g_value_get_double (value);
+       break;
+     case PROP_WIDTH:
+       filter->width = g_value_get_double (value);
+       break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+   }
+ }
+ */
+
+/*
+ static void
+ gst_opencv_steampunk_goggles_get_property (GObject * object, guint prop_id,
+     GValue * value, GParamSpec * pspec)
+ {
+   GstOpenCVSteamPunkGoggles *filter = GST_OPENCV_STEAMPUNK_GOGGLES (object);
+
+   switch (prop_id) {
+     case PROP_TEXT:
+       g_value_set_string (value, filter->textbuf);
+       break;
+     case PROP_XPOS:
+       g_value_set_int (value, filter->xpos);
+       break;
+     case PROP_YPOS:
+       g_value_set_int (value, filter->ypos);
+       break;
+     case PROP_THICKNESS:
+       g_value_set_int (value, filter->thickness);
+       break;
+     case PROP_COLOR_R:
+       g_value_set_int (value, filter->colorR);
+       break;
+     case PROP_COLOR_G:
+       g_value_set_int (value, filter->colorG);
+       break;
+     case PROP_COLOR_B:
+       g_value_set_int (value, filter->colorB);
+       break;
+     case PROP_HEIGHT:
+       g_value_set_double (value, filter->height);
+       break;
+     case PROP_WIDTH:
+       g_value_set_double (value, filter->width);
+       break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+   }
+ }
+ */
 
 /* chain function
  * this function does the actual processing
@@ -308,7 +321,11 @@ gst_opencv_steampunk_goggles_transform_ip (GstOpencvVideoFilter * base,
   GstOpenCVSteamPunkGoggles *filter = GST_OPENCV_STEAMPUNK_GOGGLES (base);
 
   // This is where the OpenCV processing magic happens
-  cppProcess(img);
+  *(filter->data) = cppProcess(img);
+
+  printf("TargetX: %d\n", *(filter->data));
+
+  int size = zmq_send (filter->publisher, filter->data, sizeof(int), 0);
 
   return GST_FLOW_OK;
 }

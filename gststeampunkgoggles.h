@@ -51,6 +51,7 @@
 #if (CV_MAJOR_VERSION >= 3)
 #include <opencv2/imgproc/imgproc_c.h>
 #endif
+#include <zmq.h>
 G_BEGIN_DECLS
 
 /* #defines don't like whitespacey bits */
@@ -83,9 +84,10 @@ struct _GstOpenCVSteamPunkGoggles
 {
   GstOpencvVideoFilter element;
 
-  CvScalar BLUE;
-  CvScalar GREEN;
-  CvScalar RED;
+  void* context;
+  void* publisher;
+  int rc;
+  int* data;
 
   struct ContourFilters contourFilters;
 };
