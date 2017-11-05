@@ -10,3 +10,8 @@ gst-launch-1.0 --gst-plugin-path=$HOME/gstreamer/SteamPunkGogglesOpenCVPlugin v4
 
 # To run on Jetson
 gst-launch-1.0 --gst-plugin-path=$HOME/gstreamer/SteamPunkGogglesOpenCVPlugin v4l2src device=/dev/video0 ! 'video/x-raw,format=RGB,width=800,height=600,framerate=30/1' ! opencvsteampunkgoggles ! videoconvert ! xvimagesink
+
+# To run gst-rtsp-server on Jetson with plugin
+# (After having moved compiled plugin into plugin path)
+/home/nvidia/gstreamer/test-launch 'v4l2src device=/dev/video0 ! video/x-raw,format=RGB,width=800,height=600,framerate=30/1 ! opencvsteampunkgoggles ! videoconvert ! omxh264enc ! rtph264pay name=pay0 pt=96'
+

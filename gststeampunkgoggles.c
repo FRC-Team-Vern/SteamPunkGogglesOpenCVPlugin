@@ -61,6 +61,7 @@
 #endif
 
 #include "gststeampunkgoggles.h"
+#include "zhelpers.h"
 #include "lib/cppprocess.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_opencv_steampunk_goggles_debug);
@@ -218,6 +219,7 @@ gst_opencv_steampunk_goggles_init (GstOpenCVSteamPunkGoggles * filter)
   filter->context = zmq_ctx_new();
   filter->publisher = zmq_socket (filter->context, ZMQ_PUB);
   filter->rc = zmq_bind (filter->publisher, "tcp://*:5800");
+  assert (filter->rc == 0);
   filter->data = malloc(sizeof(int));
 
   gst_opencv_video_filter_set_in_place (GST_OPENCV_VIDEO_FILTER_CAST (filter),
@@ -318,16 +320,17 @@ static GstFlowReturn
 gst_opencv_steampunk_goggles_transform_ip (GstOpencvVideoFilter * base,
     GstBuffer * buf, IplImage * img)
 {
-  GstOpenCVSteamPunkGoggles *filter = GST_OPENCV_STEAMPUNK_GOGGLES (base);
+    GstOpenCVSteamPunkGoggles *filter = GST_OPENCV_STEAMPUNK_GOGGLES (base);
 
-  // This is where the OpenCV processing magic happens
-  *(filter->data) = cppProcess(img);
+    // This is where the OpenCV processing magic happens
+    *(filter->data) = cppProcess(img);
 
-  printf("TargetX: %d\n", *(filter->data));
+    char update[20];
+    sprintf(update, "CenterX: %d\n", *(filter->data));
 
-  int size = zmq_send (filter->publisher, filter->data, sizeof(int), 0);
+    s_send (filter->publisher, update);
 
-  return GST_FLOW_OK;
+    return GST_FLOW_OK;
 }
 
 
