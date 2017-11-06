@@ -74,7 +74,9 @@ int cppProcess(IplImage * img) {
   if (!largestContours.empty()) {
       overlayContours(mat_img, filterContoursOutput, GREEN);
   } else {
+#if DEBUG
       std::cout << "Largest contour not found: " << std::endl;
+#endif
   }
 
   findFinalTarget(largestContours);
@@ -122,12 +124,13 @@ void filterContours(const Contours &inputContours, Contours &output) {
         if (arcLength(contour, true) < minPerimeter) continue;
         output.push_back(contour);
     }
-
+#if DEBUG
     if (output.empty()) {
         std::cout << "No contours remaining: " << std::endl;
     } else {
         std::cout << "Contours found!" << std::endl;
     }
+#endif
 }
 
 
@@ -151,7 +154,9 @@ void findLargestContoursByArea(Contours &contours, Contours &largestContours) {
     }
 
     // Report largest areas of contours
+#if DEBUG
     std::cout << "Largest areas: " << std::endl;
+#endif
     for (std::vector<cv::Point> contour : largestContours) {
         std::cout << cv::contourArea(contour) << std::endl;
     }
@@ -182,9 +187,10 @@ void findFinalTarget(const Contours& contours) {
 
     // Gets skipped if there are no contours
     if(contours.size() > 1) {
+#if DEBUG
         std::cout<<"first Rect: "<<TLR.first<<std::endl;
         std::cout<<"second Rect: "<<TLR.second<<std::endl;
-
+#endif
         // Swap if Rects are out of order from left to right
         if (TLR.first.tl().x > TLR.second.tl().x) {
             TLR = std::make_pair(TLR.second, TLR.first);
@@ -195,13 +201,13 @@ void findFinalTarget(const Contours& contours) {
         radius = ((Br.x - Tl.x)*.5);
         calcXShift();
 
-    //#if DEBUG
+#if DEBUG
         std::cout << "Tl: " <<Tl << std::endl
             << "Br: " <<Br << std::endl
             << "center: " << center << std::endl
             << "radius: " << radius << std::endl
             << "Target X: " << targetX << std::endl;
-    //#endif
+#endif
     } else {
         radius = 0;
         targetX = -999;

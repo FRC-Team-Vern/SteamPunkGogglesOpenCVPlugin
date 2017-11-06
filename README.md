@@ -15,3 +15,19 @@ gst-launch-1.0 --gst-plugin-path=$HOME/gstreamer/SteamPunkGogglesOpenCVPlugin v4
 # (After having moved compiled plugin into plugin path)
 /home/nvidia/gstreamer/test-launch 'v4l2src device=/dev/video0 ! video/x-raw,format=RGB,width=800,height=600,framerate=30/1 ! opencvsteampunkgoggles ! videoconvert ! omxh264enc ! rtph264pay name=pay0 pt=96'
 
+#systemd startup
+/etc/systemd/system/steampunkgoggles.service
+
+[Unit]
+Description=steampunk goggles opencv
+
+[Service]
+WorkingDirectory=/home/nvidia/gstreamer
+ExecStart=/home/nvidia/gstreamer/test-launch 'v4l2src device=/dev/video0 ! video/x-raw,format=RGB,width=800,height=600,framerate=30/1 ! opencvsteampunkgoggles ! videoconvert ! omxh264enc ! rtph264pay name=pay0 pt=96'
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+systemctl enable steampunkgoggles.service
+
